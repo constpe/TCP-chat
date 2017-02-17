@@ -8,10 +8,12 @@ public class Server {
         public ClientInfo(InetAddress address, Socket clientListener) {
             this.address = address;
             this.clientListener = clientListener;
+            isWaiting = true;
         }
 
         InetAddress address;
         Socket clientListener;
+        boolean isWaiting;
     }
 
     static boolean containAddress(InetAddress address, ArrayList<ClientInfo> clientsList) {
@@ -25,23 +27,36 @@ public class Server {
         return result;
     }
 
-    static void remove(InetAddress address, ArrayList<ClientInfo> clientsList) {
+    static boolean waiting(InetAddress address, ArrayList<ClientInfo> clientsList) {
+        boolean result = true;
+
         for (int i = 0; i < clientsList.size(); i++) {
+            if (clientsList.get(i).equals(address) && !clientsList.get(i).isWaiting)
+                result = false;
+        }
+
+        return result;
+    }
+
+
+    static void remove(InetAddress address, ArrayList<ClientInfo> clientsList) {
+        int i = 0;
+
+        while (i < clientsList.size()) {
             if (clientsList.get(i).address.equals(address))
                 clientsList.remove(clientsList.get(i));
+            else
+                i++;
         }
     }
 
     static class User implements Runnable {
-        ArrayList<ClientInfo> clientsList;
-        Socket clientListener;
-
         public User(Socket clientListener, ArrayList<ClientInfo> clientsList) {
             if (!containAddress(clientListener.getInetAddress(), clientsList)) {
                 clientsList.add(new ClientInfo(clientListener.getInetAddress(), clientListener));
                 System.out.println("Connected client with IP " + clientListener.getInetAddress());
             }
-            else {
+            else if (!waiting(clientListener.getInetAddress(), clientsList)){
                 remove(clientListener.getInetAddress(), clientsList);
                 clientsList.add(new ClientInfo(clientListener.getInetAddress(), clientListener));
             }
@@ -50,6 +65,9 @@ public class Server {
             Thread t = new Thread(this);
             t.start();
         }
+
+        ArrayList<ClientInfo> clientsList;
+        private Socket clientListener;
 
         private String readString(DataInputStream in) throws IOException{
             int c;
@@ -79,22 +97,17 @@ public class Server {
                         i++;
                     }
                     catch (IOException e) {
+                        System.out.println("Disconnected client with IP " + clientsList.get(i).clientListener.getInetAddress());
                         clientsList.remove(clientsList.get(i));
-                        System.out.println("Disconnected client with IP " + clientListener.getInetAddress());
                     }
                 }
             } catch (IOException e) {}
             finally
             {
-                try {
-                    out.close();
-                    in.close();
-                    clientListener.close();
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
-                catch (NullPointerException e) {}
+               for (int i = 0; i < clientsList.size(); i++) {
+                   if (clientsList.get(i).clientListener.getInetAddress().equals(clientListener))
+                       clientsList.get(i).isWaiting = false;
+               }
             }
         }
     }

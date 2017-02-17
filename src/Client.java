@@ -77,11 +77,11 @@ public class Client {
                 isConnected = false;
             }
             catch (SocketException e) {
-                JOptionPane.showMessageDialog(mainFrame, "Server connection error", "Connection error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, "Server connection error Sockey", "Connection error", JOptionPane.ERROR_MESSAGE);
                 isConnected = false;
             }
             catch (IOException e) {
-                JOptionPane.showMessageDialog(mainFrame, "Server connection error", "Connection error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, "Server connection error IO", "Connection error", JOptionPane.ERROR_MESSAGE);
                 isConnected = false;
             }
         }
