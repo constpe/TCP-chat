@@ -6,13 +6,12 @@ import java.net.*;
 
 public class Client {
     static Socket serverListener;
-    static PrintStream out;
     static boolean isClient;
 
     static void sendMessage(JFrame mainFrame, String message) {
         try {
-            out = new PrintStream(serverListener.getOutputStream());
-            out.println(message + (char)1);
+            PrintStream out = new PrintStream(serverListener.getOutputStream());
+            out.print(message + (char)1);
         }
         catch (IOException e) {
             JOptionPane.showMessageDialog(mainFrame, "Server connection error", "Connection error", JOptionPane.ERROR_MESSAGE);
@@ -55,8 +54,8 @@ public class Client {
         @Override
         public void run() {
             try {
+                serverListener = new Socket(ip, port);
                 while (isConnected) {
-                    serverListener = new Socket(ip, port);
                     DataInputStream in = new DataInputStream(serverListener.getInputStream());
                     isClient = true;
                     IPField.setEditable(false);
@@ -77,11 +76,11 @@ public class Client {
                 isConnected = false;
             }
             catch (SocketException e) {
-                JOptionPane.showMessageDialog(mainFrame, "Server connection error Sockey", "Connection error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, "Server connection error", "Connection error", JOptionPane.ERROR_MESSAGE);
                 isConnected = false;
             }
             catch (IOException e) {
-                JOptionPane.showMessageDialog(mainFrame, "Server connection error IO", "Connection error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, "Server connection error", "Connection error", JOptionPane.ERROR_MESSAGE);
                 isConnected = false;
             }
         }
